@@ -1,9 +1,10 @@
-document.addEventListener('DOMContentLoaded', ( ) => {
+document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    // <<< FINAL UPDATE: Using the new ngrok URL from your screenshot >>>
-    const apiEndpoint = 'https://13d19a40e0f2.ngrok-free.app/api/chat';
+    
+    // <<< MODIFICATION 1: Using the NEW ngrok URL from your Colab >>>
+    const apiEndpoint = 'https://1917a87e3d94.ngrok-free.app/api/chat';
 
     // Function to add a message to the chat box
     function addMessage(message, sender ) {
@@ -22,7 +23,6 @@ document.addEventListener('DOMContentLoaded', ( ) => {
         addMessage(messageText, 'user');
         messageInput.value = ''; // Clear input field
 
-        // Add a "thinking" message
         const thinkingMessage = document.createElement('div');
         thinkingMessage.classList.add('message', 'bot-message');
         thinkingMessage.textContent = 'جاري التفكير...';
@@ -34,12 +34,14 @@ document.addEventListener('DOMContentLoaded', ( ) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'ngrok-skip-browser-warning': 'true'
+                    'ngrok-skip-browser-warning': 'true' // This header is still important
                 },
                 body: JSON.stringify({
-                    model: "deepseek-coder:6.7b", 
+                    // <<< MODIFICATION 2: Using the CORRECT model (llama3) >>>
+                    model: "llama3:8b", 
                     messages: [
-                        { role: "system", content: "You are an expert programming AI assistant. You must always answer in Arabic." },
+                        // <<< MODIFICATION 3: Using the appropriate system prompt for Llama3 >>>
+                        { role: "system", content: "You are a helpful AI assistant. You must answer in Arabic only." },
                         { role: "user", content: messageText }
                     ],
                     stream: false
@@ -52,15 +54,12 @@ document.addEventListener('DOMContentLoaded', ( ) => {
 
             const data = await response.json();
             
-            // Remove the "thinking" message
             chatBox.removeChild(thinkingMessage);
-
-            // Add the bot's actual response
             addMessage(data.message.content, 'bot');
 
         } catch (error) {
             console.error('Error:', error);
-            thinkingMessage.textContent = 'عذراً، حدث خطأ أثناء محاولة الاتصال بالنموذج. تأكد من أن Colab notebook يعمل.';
+            thinkingMessage.textContent = 'عذراً، حدث خطأ. تأكد من أن نافذة Google Colab لا تزال تعمل وأن الاتصال بالإنترنت سليم.';
         }
     }
 
@@ -72,6 +71,5 @@ document.addEventListener('DOMContentLoaded', ( ) => {
         }
     });
 
-    // Initial bot message
-    addMessage('أهلاً بك! أنا مساعدك البرمجي، كيف يمكنني مساعدتك اليوم؟', 'bot');
+    addMessage('أهلاً بك! أنا مساعدك الذكي، كيف يمكنني مساعدتك اليوم؟', 'bot');
 });
