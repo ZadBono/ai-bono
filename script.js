@@ -3,25 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     
-    // <<< MODIFICATION 1: Using the NEW ngrok URL from your Colab >>>
-    const apiEndpoint = 'https://7afaadf76b7c.ngrok-free.app/api/chat';
+    // The local address of your Ollama server
+    const apiEndpoint = 'http://127.0.0.1:11434/api/chat';
 
-    // Function to add a message to the chat box
-    function addMessage(message, sender ) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', `${sender}-message`);
-        messageElement.textContent = message;
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-    }
-
-    // Function to handle sending a message
-    async function sendMessage() {
+    async function sendMessage( ) {
         const messageText = messageInput.value.trim();
         if (messageText === '') return;
 
         addMessage(messageText, 'user');
-        messageInput.value = ''; // Clear input field
+        messageInput.value = '';
 
         const thinkingMessage = document.createElement('div');
         thinkingMessage.classList.add('message', 'bot-message');
@@ -32,44 +22,39 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'ngrok-skip-browser-warning': 'true' // This header is still important
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    // <<< MODIFICATION 2: Using the CORRECT model (llama3) >>>
-                    model: "llama3:8b", 
+                    model: "phi3:mini", // The light and fast model
                     messages: [
-                        // <<< MODIFICATION 3: Using the appropriate system prompt for Llama3 >>>
-                        { role: "system", content: "You are a helpful AI assistant. You must answer in Arabic only." },
+                        { role: "system", content: "أنت مساعد ذكاء اصطناعي اسمك 'بونو'. يجب أن ترد دائماً باللغة العربية." },
                         { role: "user", content: messageText }
                     ],
                     stream: false
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
 
             const data = await response.json();
-            
             chatBox.removeChild(thinkingMessage);
             addMessage(data.message.content, 'bot');
 
         } catch (error) {
             console.error('Error:', error);
-            thinkingMessage.textContent = 'عذراً، حدث خطأ. تأكد من أن نافذة Google Colab لا تزال تعمل وأن الاتصال بالإنترنت سليم.';
+            thinkingMessage.textContent = 'عذراً، حدث خطأ. تأكد من أن شاشة "ollama serve" لا تزال تعمل على جهازك.';
         }
     }
 
-    // Event listeners
-    sendButton.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    function addMessage(message, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', `${sender}-message`);
+        messageElement.textContent = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-    addMessage('أهلاً بك! أنا مساعدك الذكي، كيف يمكنني مساعدتك اليوم؟', 'bot');
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    addMessage("أهلاً بك! أنا 'بونو'، مساعدك الذكي على جهازك. كيف يمكنني مساعدتك؟", 'bot');
 });
