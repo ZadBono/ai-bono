@@ -1,8 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', ( ) => {
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    const apiEndpoint = 'https://e9d5885f7f1d.ngrok-free.app/api/chat';
+    // <<< FINAL UPDATE: Using the new ngrok URL from your screenshot >>>
+    const apiEndpoint = 'https://13d19a40e0f2.ngrok-free.app/api/chat';
 
     // Function to add a message to the chat box
     function addMessage(message, sender ) {
@@ -33,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // <<< FINAL MODIFICATION: Added the header to skip ngrok's warning page >>>
                     'ngrok-skip-browser-warning': 'true'
                 },
                 body: JSON.stringify({
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         { role: "system", content: "You are an expert programming AI assistant. You must always answer in Arabic." },
                         { role: "user", content: messageText }
                     ],
-                    stream: false // We want the full response at once
+                    stream: false
                 }),
             });
 
@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error:', error);
-            // Update the "thinking" message to show an error
             thinkingMessage.textContent = 'عذراً، حدث خطأ أثناء محاولة الاتصال بالنموذج. تأكد من أن Colab notebook يعمل.';
         }
     }
