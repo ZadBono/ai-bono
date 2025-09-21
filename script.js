@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.getElementById('send-button');
     
     // <<< MODIFICATION 1: Using the NEW ngrok URL from your Colab >>>
-    const apiEndpoint = 'https://1917a87e3d94.ngrok-free.app/api/chat';
+    const apiEndpoint = 'https://7afaadf76b7c.ngrok-free.app/api/chat';
 
     // Function to add a message to the chat box
     function addMessage(message, sender ) {
