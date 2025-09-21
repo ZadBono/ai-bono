@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "deepseek-coder:6.7b", // اسم النموذج الذي نستخدمه
+                    model: "phi3:mini", // اسم النموذج الذي نستخدمه
                     messages: [{ role: "user", content: userText }],
                     stream: false // لتبسيط الأمر، سنجعل الرد يأتي دفعة واحدة
                 }),
