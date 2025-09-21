@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    const apiEndpoint = 'http://127.0.0.1:11434/api/chat';
+    // <<< MODIFICATION 1: Updated the API endpoint to the new ngrok URL >>>
+    const apiEndpoint = 'https://e9d5885f7f1d.ngrok-free.app/api/chat';
 
     // Function to add a message to the chat box
-    function addMessage(message, sender ) {
+    function addMessage(message, sender  ) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
         messageElement.textContent = message;
@@ -35,9 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "phi3:mini", // The model we are using
+                    // <<< MODIFICATION 2: Changed the model to the powerful deepseek-coder >>>
+                    model: "deepseek-coder:6.7b", 
                     messages: [
-                        { role: "system", content: "You are a helpful AI assistant. You must always answer in Arabic." },
+                        { role: "system", content: "You are an expert programming AI assistant. You must always answer in Arabic." },
                         { role: "user", content: messageText }
                     ],
                     stream: false // We want the full response at once
@@ -59,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             // Update the "thinking" message to show an error
-            thinkingMessage.textContent = 'عذراً، حدث خطأ أثناء محاولة الاتصال بالنموذج. تأكد من أن Ollama تعمل.';
+            thinkingMessage.textContent = 'عذراً، حدث خطأ أثناء محاولة الاتصال بالنموذج. تأكد من أن Colab notebook يعمل.';
         }
     }
 
