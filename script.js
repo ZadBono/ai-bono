@@ -2,11 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
-    // <<< MODIFICATION 1: Updated the API endpoint to the new ngrok URL >>>
     const apiEndpoint = 'https://e9d5885f7f1d.ngrok-free.app/api/chat';
 
     // Function to add a message to the chat box
-    function addMessage(message, sender  ) {
+    function addMessage(message, sender ) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
         messageElement.textContent = message;
@@ -34,9 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    // <<< FINAL MODIFICATION: Added the header to skip ngrok's warning page >>>
+                    'ngrok-skip-browser-warning': 'true'
                 },
                 body: JSON.stringify({
-                    // <<< MODIFICATION 2: Changed the model to the powerful deepseek-coder >>>
                     model: "deepseek-coder:6.7b", 
                     messages: [
                         { role: "system", content: "You are an expert programming AI assistant. You must always answer in Arabic." },
