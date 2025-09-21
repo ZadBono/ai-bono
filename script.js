@@ -36,7 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     model: "phi3:mini", // The model we are using
-                    messages: [{ role: "user", content: messageText }],
+                    messages: [
+                        { role: "system", content: "You are a helpful AI assistant. You must always answer in Arabic." },
+                        { role: "user", content: messageText }
+                    ],
                     stream: false // We want the full response at once
                 }),
             });
