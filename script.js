@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     
-    // The local address of your Ollama server
     const apiEndpoint = 'http://127.0.0.1:11434/api/chat';
 
     async function sendMessage( ) {
@@ -24,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: "phi3:mini", // The light and fast model
+                    model: "phi3:mini",
                     messages: [
                         { role: "system", content: "أنت مساعد ذكاء اصطناعي اسمك 'بونو'. يجب أن ترد دائماً باللغة العربية." },
                         { role: "user", content: messageText }
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error:', error);
-            thinkingMessage.textContent = 'عذراً، حدث خطأ. تأكد من أن شاشة "ollama serve" لا تزال تعمل على جهازك.';
+            thinkingMessage.textContent = 'عذراً، حدث خطأ. تأكد من أن Ollama تعمل على جهازك (من أيقونتها بجانب الساعة).';
         }
     }
 
