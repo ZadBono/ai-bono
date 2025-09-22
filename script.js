@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const apiEndpoint = 'http://localhost:3000/chat';
 
-    // --- تعليمات أولية محسّنة لتنسيق الكود وتعريف الهوية ---
     let conversationHistory = [
         { 
             role: "system", 
@@ -13,9 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // --- دالة لإضافة الرسالة الترحيبية في البداية ---
     function initializeChat( ) {
-        chatBox.innerHTML = ''; // مسح أي محتوى افتراضي
+        chatBox.innerHTML = '';
         addMessage("أهلاً بك! أنا بونو، مساعدك البرمجي. كيف يمكنني مساعدتك اليوم؟", 'bot');
     }
 
@@ -60,12 +58,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- تم تعديل هذه الدالة بالكامل لتتعرف على الكود ---
+    // ==================================================================
+    // === تم إصلاح دالة addMessage بالكامل لتجنب التكرار ===
+    // ==================================================================
     function addMessage(text, sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
 
-        // إذا كانت الرسالة من المستخدم، فقط أضف النص
+        // التعامل مع رسائل المستخدم ببساطة
         if (sender === 'user') {
             const p = document.createElement('p');
             p.textContent = text;
@@ -75,28 +75,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // إذا كانت الرسالة من البوت، قم بتحليلها
+        // تحليل رسائل البوت للبحث عن كود
         const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
         let lastIndex = 0;
         let match;
+        let contentAdded = false; // متغير لتتبع إذا تمت إضافة أي محتوى
 
-        // حلقة للبحث عن كل كتل الأكواد في النص
         while ((match = codeBlockRegex.exec(text)) !== null) {
-            // إضافة النص العادي الذي يسبق الكود
+            // إضافة النص الذي يسبق الكود
             if (match.index > lastIndex) {
                 const p = document.createElement('p');
                 p.textContent = text.substring(lastIndex, match.index);
                 messageElement.appendChild(p);
             }
 
-            const lang = match[1] || 'plaintext';
-            const code = match[2].trim();
+            const lang = match || 'plaintext';
+            const code = match.trim();
             
-            // إنشاء حاوية الكود الكاملة
             const wrapper = document.createElement('div');
             wrapper.className = 'code-block-wrapper';
 
-            // إنشاء صندوق الكود
             const pre = document.createElement('pre');
             const codeEl = document.createElement('code');
             const uniqueId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
             codeEl.className = `language-${lang}`;
             codeEl.textContent = code;
             
-            // إنشاء زر النسخ
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-btn';
             copyBtn.textContent = 'نسخ';
@@ -115,34 +112,37 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapper.appendChild(copyBtn);
             messageElement.appendChild(wrapper);
 
-            lastIndex = match.index + match[0].length;
+            lastIndex = match.index + match.length;
+            contentAdded = true;
         }
 
-        // إضافة أي نص متبقي بعد آخر كتلة كود
+        // إضافة النص المتبقي بعد آخر كتلة كود
         if (lastIndex < text.length) {
             const p = document.createElement('p');
             p.textContent = text.substring(lastIndex);
             messageElement.appendChild(p);
+            contentAdded = true;
         }
         
-        // إذا لم يتم العثور على أي كود، أضف النص بالكامل كفقرة عادية
-        if (lastIndex === 0) {
-            const p = document.createElement('p');
-            p.textContent = text;
-            messageElement.appendChild(p);
+        // إذا لم يتم إضافة أي محتوى على الإطلاق (لأن النص كان فارغًا)، لا تفعل شيئًا
+        if (!contentAdded && text.trim() !== '') {
+             const p = document.createElement('p');
+             p.textContent = text;
+             messageElement.appendChild(p);
         }
 
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // لا تضف عنصر رسالة فارغ
+        if (messageElement.hasChildNodes()) {
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-        // تفعيل تلوين الأكواد وتفعيل أزرار النسخ بعد إضافة الرسالة
+        // تفعيل المكتبات
         hljs.highlightAll();
         const clipboard = new ClipboardJS('.copy-btn');
         clipboard.on('success', function(e) {
             e.trigger.textContent = 'تم النسخ!';
-            setTimeout(() => {
-                e.trigger.textContent = 'نسخ';
-            }, 2000);
+            setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
             e.clearSelection();
         });
     }
@@ -150,6 +150,5 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- بدء المحادثة بالرسالة الترحيبية ---
     initializeChat();
 });
