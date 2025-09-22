@@ -3,12 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     
-    // تم تعديل هذا السطر ليتصل بالخادم الوكيل
     const apiEndpoint = 'http://localhost:3000/chat';
 
-    // مصفوفة لحفظ سجل المحادثة
+    // --- تم تعديل التعليمات الأولية لتكون أكثر صرامة ---
     let conversationHistory = [
-        { role: "system", content: "أنت مساعد ذكاء اصطناعي اسمك 'بونو'. يجب أن ترد دائماً باللغة العربية." }
+        { 
+            role: "system", 
+            content: "مهمتك واضحة ومحددة: أنت مساعد برمجي اسمك 'بونو'. ردودك يجب أن تكون باللغة العربية الفصحى فقط. ممنوع استخدام أي لغة أخرى. ابدأ ردك دائمًا بـ 'أهلاً بك'. لا تذكر أي معلومات عن كونك نموذج لغوي أو AI." 
+        }
     ];
 
     async function sendMessage( ) {
@@ -18,12 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         addMessage(messageText, 'user');
         messageInput.value = '';
 
-        // إضافة رسالة المستخدم إلى سجل المحادثة
         conversationHistory.push({ role: "user", content: messageText });
 
         const thinkingMessage = document.createElement('div');
         thinkingMessage.classList.add('message', 'bot-message');
-        thinkingMessage.innerHTML = '<div class="typing-indicator"></div>'; // مؤشر كتابة
+        thinkingMessage.innerHTML = '<div class="typing-indicator"></div>';
         chatBox.appendChild(thinkingMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -32,8 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: "phi3:mini",
-                    messages: conversationHistory, // إرسال سجل المحادثة كاملاً
+                    // --- تم تغيير اسم النموذج هنا ---
+                    model: "gemma:2b",
+                    messages: conversationHistory,
                     stream: false
                 }),
             });
@@ -43,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const botReply = data.message.content;
 
-            // إضافة رد البوت إلى سجل المحادثة
             conversationHistory.push({ role: "assistant", content: botReply });
 
             chatBox.removeChild(thinkingMessage);
@@ -60,14 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
         
-        // استخدام innerHTML للسماح بعرض العناصر مثل مؤشر الكتابة
-        if (sender === 'bot' || sender === 'user') {
-            // تحويل النص العادي إلى HTML آمن لتجنب مشاكل العرض
-            const textNode = document.createTextNode(message);
-            messageElement.appendChild(textNode);
-        } else {
-            messageElement.innerHTML = message;
-        }
+        const textNode = document.createTextNode(message);
+        messageElement.appendChild(textNode);
         
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -75,7 +70,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    // لا حاجة لإضافة الرسالة الترحيبية هنا لأنها تأتي من الـ system prompt
-    // addMessage("أهلاً بك! أنا 'بونو'، مساعدك الذكي على جهازك. كيف يمكنني مساعدتك؟", 'bot');
 });
