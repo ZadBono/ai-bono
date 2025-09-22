@@ -59,76 +59,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================================================================
-    // === تم إصلاح دالة addMessage بالكامل لتجنب التكرار ===
+    // === النسخة النهائية والمبسطة من دالة addMessage ===
     // ==================================================================
     function addMessage(text, sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
 
-        // التعامل مع رسائل المستخدم ببساطة
+        // رسائل المستخدم بسيطة ومباشرة
         if (sender === 'user') {
             const p = document.createElement('p');
             p.textContent = text;
             messageElement.appendChild(p);
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return;
-        }
+        } 
+        // رسائل البوت تحتاج إلى تحليل
+        else {
+            const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
+            let lastIndex = 0;
+            let match;
 
-        // تحليل رسائل البوت للبحث عن كود
-        const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-        let lastIndex = 0;
-        let match;
-        let contentAdded = false; // متغير لتتبع إذا تمت إضافة أي محتوى
+            while ((match = codeBlockRegex.exec(text)) !== null) {
+                // إضافة النص العادي قبل الكود
+                if (match.index > lastIndex) {
+                    const p = document.createElement('p');
+                    p.textContent = text.substring(lastIndex, match.index);
+                    messageElement.appendChild(p);
+                }
 
-        while ((match = codeBlockRegex.exec(text)) !== null) {
-            // إضافة النص الذي يسبق الكود
-            if (match.index > lastIndex) {
-                const p = document.createElement('p');
-                p.textContent = text.substring(lastIndex, match.index);
-                messageElement.appendChild(p);
+                const lang = match || 'plaintext';
+                const code = match.trim();
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block-wrapper';
+
+                const pre = document.createElement('pre');
+                const codeEl = document.createElement('code');
+                const uniqueId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                codeEl.id = uniqueId;
+                codeEl.className = `language-${lang}`;
+                codeEl.textContent = code;
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'نسخ';
+                copyBtn.setAttribute('data-clipboard-target', `#${uniqueId}`);
+
+                pre.appendChild(codeEl);
+                wrapper.appendChild(pre);
+                wrapper.appendChild(copyBtn);
+                messageElement.appendChild(wrapper);
+
+                lastIndex = codeBlockRegex.lastIndex;
             }
 
-            const lang = match || 'plaintext';
-            const code = match.trim();
-            
-            const wrapper = document.createElement('div');
-            wrapper.className = 'code-block-wrapper';
-
-            const pre = document.createElement('pre');
-            const codeEl = document.createElement('code');
-            const uniqueId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            codeEl.id = uniqueId;
-            codeEl.className = `language-${lang}`;
-            codeEl.textContent = code;
-            
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-btn';
-            copyBtn.textContent = 'نسخ';
-            copyBtn.setAttribute('data-clipboard-target', `#${uniqueId}`);
-
-            pre.appendChild(codeEl);
-            wrapper.appendChild(pre);
-            wrapper.appendChild(copyBtn);
-            messageElement.appendChild(wrapper);
-
-            lastIndex = match.index + match.length;
-            contentAdded = true;
-        }
-
-        // إضافة النص المتبقي بعد آخر كتلة كود
-        if (lastIndex < text.length) {
-            const p = document.createElement('p');
-            p.textContent = text.substring(lastIndex);
-            messageElement.appendChild(p);
-            contentAdded = true;
-        }
-        
-        // إذا لم يتم إضافة أي محتوى على الإطلاق (لأن النص كان فارغًا)، لا تفعل شيئًا
-        if (!contentAdded && text.trim() !== '') {
-             const p = document.createElement('p');
-             p.textContent = text;
-             messageElement.appendChild(p);
+            // إضافة أي نص متبقي بعد آخر كتلة كود
+            if (lastIndex < text.length) {
+                const p = document.createElement('p');
+                p.textContent = text.substring(lastIndex);
+                messageElement.appendChild(p);
+            }
         }
 
         // لا تضف عنصر رسالة فارغ
@@ -137,14 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // تفعيل المكتبات
-        hljs.highlightAll();
-        const clipboard = new ClipboardJS('.copy-btn');
-        clipboard.on('success', function(e) {
-            e.trigger.textContent = 'تم النسخ!';
-            setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
-            e.clearSelection();
-        });
+        // تفعيل المكتبات فقط لرسائل البوت
+        if (sender === 'bot') {
+            hljs.highlightAll();
+            const clipboard = new ClipboardJS('.copy-btn');
+            clipboard.on('success', function(e) {
+                e.trigger.textContent = 'تم النسخ!';
+                setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
+                e.clearSelection();
+            });
+        }
     }
 
     sendButton.addEventListener('click', sendMessage);
