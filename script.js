@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
     
-    const apiEndpoint = 'http://127.0.0.1:11434/api/chat';
+    const apiEndpoint = 'http://localhost:3000/chat';
 
     async function sendMessage( ) {
         const messageText = messageInput.value.trim();
