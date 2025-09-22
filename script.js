@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: "gemma:2b", messages: conversationHistory, stream: false }),
+                body: JSON.stringify({ model: "llama3:8b", messages: conversationHistory, stream: false }),
             });
 
             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
