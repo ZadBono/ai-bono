@@ -1,22 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- تعريف العناصر الأساسية ---
     const chatBox = document.getElementById('chat-box');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
+    const newChatButton = document.getElementById('new-chat-button');
     
     const apiEndpoint = 'http://localhost:3000/chat';
 
-    let conversationHistory = [
-        { 
-            role: "system", 
-            content: "أنت مساعد برمجي اسمك 'بونو'. ردودك يجب أن تكون باللغة العربية الفصحى. إذا سألك أي شخص 'من أنت؟' أو ما شابه، يجب أن تكون إجابتك 'أنا بونو، مساعدك البرمجي'. عند كتابة أي كود، يجب أن تضعه دائمًا داخل ثلاثة backticks ``` متبوعة باسم اللغة، هكذا: ```javascript ...الكود هنا... ```. لا تستخدم الإيموجي." 
-        }
-    ];
+    // --- التعليمات الأولية (الشخصية ) ---
+    const systemPrompt = { 
+        role: "system", 
+        content: "أنت مساعد ذكي ومرح اسمك 'بونو'. تحدث باللغة العربية بأسلوب ودود وغير رسمي. يمكنك استخدام الإيموجي لإضافة لمسة من المرح على ردودك. مهمتك الأساسية هي مساعدة المستخدمين في البرمجة، ولكن لا تتردد في إلقاء دعابة بسيطة. إذا سألك أحد عن هويتك، قل 'أنا بونو، صديقك المبرمج! 😉'. عند كتابة أي كود، يجب أن تضعه دائمًا داخل ثلاثة backticks ``` متبوعة باسم اللغة، هكذا: ```javascript ...الكود هنا... ```." 
+    };
 
-    function initializeChat( ) {
+    // --- ذاكرة المحادثة ---
+    let conversationHistory = [systemPrompt];
+
+    // --- بدء محادثة جديدة ---
+    function startNewChat() {
         chatBox.innerHTML = '';
-        addMessage("أهلاً بك! أنا بونو، مساعدك البرمجي. كيف يمكنني مساعدتك اليوم؟", 'bot');
+        conversationHistory = [systemPrompt];
+        addMessage("أهلاً بك من جديد! أنا بونو، وجاهز لمساعدتك. ماذا لديك اليوم؟ 😄", 'bot');
     }
 
+    // --- إرسال الرسالة ---
     async function sendMessage() {
         const messageText = messageInput.value.trim();
         if (messageText === '') return;
@@ -25,21 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
         messageInput.value = '';
         conversationHistory.push({ role: "user", content: messageText });
 
-        const thinkingMessage = document.createElement('div');
-        thinkingMessage.classList.add('message', 'bot-message');
-        thinkingMessage.innerHTML = '<div><div class="typing-indicator"></div></div>';
-        chatBox.appendChild(thinkingMessage);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const thinkingMessage = addMessage('<div class="typing-indicator"></div>', 'bot-typing');
 
         try {
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: "gemma:2b",
-                    messages: conversationHistory,
-                    stream: false
-                }),
+                body: JSON.stringify({ model: "gemma:2b", messages: conversationHistory, stream: false }),
             });
 
             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
@@ -54,97 +53,69 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             chatBox.removeChild(thinkingMessage);
-            addMessage('عذراً، حدث خطأ. تأكد من أن الخادم الوكيل (النافذة السوداء) و Ollama يعملان على جهازك.', 'bot-error');
+            addMessage('عذراً، حدث خطأ فني. 🔌 تأكد من أن الخادم الوكيل (النافذة السوداء) و Ollama يعملان على جهازك.', 'bot-error');
         }
     }
 
-    // ==================================================================
-    // === النسخة النهائية والمضمونة من دالة addMessage ===
-    // ==================================================================
+    // --- إضافة الرسالة إلى الواجهة (النسخة النهائية) ---
     function addMessage(text, sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', `${sender}-message`);
 
-        // رسائل المستخدم بسيطة ومباشرة
-        if (sender === 'user') {
-            const p = document.createElement('p');
-            p.textContent = text;
-            messageElement.appendChild(p);
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+
+        // رسائل المستخدم أو مؤشر الكتابة
+        if (sender === 'user' || sender === 'bot-typing') {
+            contentDiv.innerHTML = text;
         } 
-        // رسائل البوت تحتاج إلى تحليل
+        // رسائل البوت أو الخطأ
         else {
-            const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-            let lastIndex = 0;
-            let match;
+            // استخدام marked.js لتحويل الماركداون إلى HTML
+            const htmlContent = marked.parse(text);
+            contentDiv.innerHTML = htmlContent;
 
-            while ((match = codeBlockRegex.exec(text)) !== null) {
-                // إضافة النص العادي قبل الكود
-                if (match.index > lastIndex) {
-                    const p = document.createElement('p');
-                    p.textContent = text.substring(lastIndex, match.index);
-                    messageElement.appendChild(p);
-                }
-
-                const lang = match || 'plaintext';
-                const code = match.trim();
-                
+            // إعادة تلوين الأكواد بعد تحويل الماركداون
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                const lang = Array.from(block.classList).find(c => c.startsWith('language-'));
                 const wrapper = document.createElement('div');
                 wrapper.className = 'code-block-wrapper';
 
-                const pre = document.createElement('pre');
-                const codeEl = document.createElement('code');
                 const uniqueId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                codeEl.id = uniqueId;
-                codeEl.className = `language-${lang}`;
-                codeEl.textContent = code;
+                block.id = uniqueId;
                 
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'copy-btn';
                 copyBtn.textContent = 'نسخ';
                 copyBtn.setAttribute('data-clipboard-target', `#${uniqueId}`);
 
-                pre.appendChild(codeEl);
-                wrapper.appendChild(pre);
+                block.parentElement.replaceWith(wrapper);
+                wrapper.appendChild(block.parentElement);
                 wrapper.appendChild(copyBtn);
-                messageElement.appendChild(wrapper);
 
-                lastIndex = codeBlockRegex.lastIndex;
-            }
-
-            // إضافة أي نص متبقي بعد آخر كتلة كود
-            if (lastIndex < text.length) {
-                const p = document.createElement('p');
-                p.textContent = text.substring(lastIndex);
-                messageElement.appendChild(p);
-            }
+                hljs.highlightElement(block);
+            });
         }
 
-        // لا تضف عنصر رسالة فارغ إلى الشاشة
-        if (messageElement.hasChildNodes()) {
-            chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        messageElement.appendChild(contentDiv);
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-        // تفعيل المكتبات فقط لرسائل البوت
-        if (sender === 'bot') {
-            // تأكد من وجود highlight.js قبل استدعائه
-            if (typeof hljs !== 'undefined') {
-                hljs.highlightAll();
-            }
-            // تأكد من وجود ClipboardJS قبل استدعائه
-            if (typeof ClipboardJS !== 'undefined') {
-                const clipboard = new ClipboardJS('.copy-btn');
-                clipboard.on('success', function(e) {
-                    e.trigger.textContent = 'تم النسخ!';
-                    setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
-                    e.clearSelection();
-                });
-            }
-        }
+        // تفعيل النسخ
+        new ClipboardJS('.copy-btn').on('success', e => {
+            e.trigger.textContent = 'تم النسخ!';
+            setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
+            e.clearSelection();
+        });
+        
+        return messageElement; // لإعادة عنصر مؤشر الكتابة
     }
 
+    // --- ربط الأحداث ---
     sendButton.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    newChatButton.addEventListener('click', startNewChat);
 
-    initializeChat();
+    // --- بدء أول محادثة عند تحميل الصفحة ---
+    startNewChat();
 });
