@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================================================================
-    // === النسخة النهائية والمبسطة من دالة addMessage ===
+    // === النسخة النهائية والمضمونة من دالة addMessage ===
     // ==================================================================
     function addMessage(text, sender) {
         const messageElement = document.createElement('div');
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // لا تضف عنصر رسالة فارغ
+        // لا تضف عنصر رسالة فارغ إلى الشاشة
         if (messageElement.hasChildNodes()) {
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -127,13 +127,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // تفعيل المكتبات فقط لرسائل البوت
         if (sender === 'bot') {
-            hljs.highlightAll();
-            const clipboard = new ClipboardJS('.copy-btn');
-            clipboard.on('success', function(e) {
-                e.trigger.textContent = 'تم النسخ!';
-                setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
-                e.clearSelection();
-            });
+            // تأكد من وجود highlight.js قبل استدعائه
+            if (typeof hljs !== 'undefined') {
+                hljs.highlightAll();
+            }
+            // تأكد من وجود ClipboardJS قبل استدعائه
+            if (typeof ClipboardJS !== 'undefined') {
+                const clipboard = new ClipboardJS('.copy-btn');
+                clipboard.on('success', function(e) {
+                    e.trigger.textContent = 'تم النسخ!';
+                    setTimeout(() => { e.trigger.textContent = 'نسخ'; }, 2000);
+                    e.clearSelection();
+                });
+            }
         }
     }
 
