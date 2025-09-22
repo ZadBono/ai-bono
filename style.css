@@ -8,18 +8,18 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    padding: 15px; /* إضافة هوامش حول الحاوية */
-    box-sizing: border-box; /* لضمان حساب الهوامش بشكل صحيح */
+    padding: 15px;
+    box-sizing: border-box;
 }
 
-/* --- حاوية المحادثة الرئيسية (تم تكبيرها) --- */
+/* --- حاوية المحادثة الرئيسية --- */
 .chat-container {
-    width: 100%; /* عرض كامل */
-    max-width: 1000px; /* زيادة العرض الأقصى */
-    height: 100%; /* ارتفاع كامل */
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
     background-color: #1e1e1e;
     border-radius: 10px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6 );
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -27,9 +27,11 @@ body {
 
 /* --- رأس المحادثة --- */
 .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: #252526;
     padding: 15px 20px;
-    text-align: center;
     border-bottom: 1px solid #333;
     flex-shrink: 0;
 }
@@ -38,6 +40,23 @@ body {
     margin: 0;
     font-size: 1.2em;
 }
+
+/* زر محادثة جديدة */
+#new-chat-button {
+    background: none;
+    border: 1px solid #444;
+    color: #ccc;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+#new-chat-button:hover {
+    background-color: #333;
+    color: white;
+}
+
 
 /* --- صندوق عرض الرسائل --- */
 .chat-box {
@@ -48,57 +67,49 @@ body {
     flex-direction: column;
 }
 
-/* --- تصميم شريط التمرير (Scrollbar) --- */
 .chat-box::-webkit-scrollbar { width: 8px; }
 .chat-box::-webkit-scrollbar-track { background: #1e1e1e; }
 .chat-box::-webkit-scrollbar-thumb { background-color: #555; border-radius: 10px; border: 2px solid #1e1e1e; }
 
 /* --- تصميم الرسائل العام --- */
 .message {
-    display: flex;
-    flex-direction: column;
-    max-width: 90%; /* زيادة عرض الرسائل قليلاً */
+    max-width: 90%;
     line-height: 1.6;
     margin-bottom: 20px;
 }
 
-.message > :first-child {
+.message-content {
     padding: 12px 18px;
     border-radius: 18px;
 }
 
-/* --- رسائل البوت (على اليسار) --- */
 .bot-message { align-self: flex-start; }
-.bot-message > :first-child { background-color: #2d2d2d; border-top-left-radius: 5px; }
+.bot-message .message-content { background-color: #2d2d2d; border-top-left-radius: 5px; }
 
-/* --- رسائل المستخدم (على اليمين) --- */
 .user-message { align-self: flex-end; }
-.user-message > :first-child { background-color: #007acc; color: white; border-top-right-radius: 5px; }
+.user-message .message-content { background-color: #007acc; color: white; border-top-right-radius: 5px; }
 
-/* --- رسالة الخطأ --- */
-.bot-error-message { background-color: #4d2525; color: #ffc8c8; border: 1px solid #8B0000; }
+.bot-error-message .message-content { background-color: #4d2525; color: #ffc8c8; border: 1px solid #8B0000; }
 
-/* --- مؤشر الكتابة المتحرك --- */
 .typing-indicator { display: flex; align-items: center; }
 .typing-indicator::after { content: '...'; font-size: 1.5em; font-weight: bold; animation: typing 1.2s infinite; }
 @keyframes typing { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
 
-/* 
-=========================================
-=== الأنماط الجديدة لكود العرض وزر النسخ ===
-=========================================
-*/
+/* --- أنماط الماركداون --- */
+.message-content p { margin: 0 0 10px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.message-content ul, .message-content ol { margin: 0 0 10px 20px; padding: 0; }
+.message-content li { margin-bottom: 5px; }
 
-/* حاوية الكود وزر النسخ */
+/* --- حاوية الكود وزر النسخ --- */
 .code-block-wrapper {
     position: relative;
     margin-top: 10px;
-    background: #282c34; /* لون الخلفية من ثيم atom-one-dark */
+    background: #282c34;
     border-radius: 8px;
     border: 1px solid #444;
 }
 
-/* تصميم زر النسخ */
 .copy-btn {
     position: absolute;
     top: 8px;
@@ -109,34 +120,22 @@ body {
     border-radius: 5px;
     cursor: pointer;
     font-size: 0.8em;
-    opacity: 0; /* إخفاء الزر افتراضيًا */
+    opacity: 0;
     transition: opacity 0.2s, background-color 0.2s;
     z-index: 10;
 }
 
-/* إظهار الزر عند مرور الماوس فوق الكود */
-.code-block-wrapper:hover .copy-btn {
-    opacity: 1;
-}
+.code-block-wrapper:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { background-color: #4b5162; }
+[dir="rtl"] .copy-btn { right: auto; left: 8px; }
 
-.copy-btn:hover {
-    background-color: #4b5162;
-}
-
-/* تعديل للغة العربية (RTL) */
-[dir="rtl"] .copy-btn {
-    right: auto;
-    left: 8px;
-}
-
-/* تصميم صندوق الكود نفسه */
 pre code.hljs {
     display: block;
     overflow-x: auto;
     padding: 1em;
-    padding-top: 2.5em; /* إضافة مساحة للزر في الأعلى */
+    padding-top: 2.5em;
     color: #abb2bf;
-    font-family: 'Fira Code', 'Courier New', Courier, monospace; /* خط أفضل للأكواد */
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
     font-size: 0.9em;
     border-radius: 8px;
 }
@@ -161,10 +160,7 @@ pre code.hljs {
     margin-left: 10px;
 }
 
-#message-input:focus {
-    outline: none;
-    border-color: #007acc;
-}
+#message-input:focus { outline: none; border-color: #007acc; }
 
 #send-button {
     padding: 12px 22px;
@@ -178,6 +174,4 @@ pre code.hljs {
     transition: background-color 0.3s;
 }
 
-#send-button:hover {
-    background-color: #005a9e;
-}
+#send-button:hover { background-color: #005a9e; }
